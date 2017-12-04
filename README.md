@@ -8,4 +8,4 @@ BotTesteVocacional/diagrama.PNG
 Exemplo de imagem do bot
 ![Bot1](https://raw.githubusercontent.com/RodrigoRGRB/BotTesteVocacional/master/bot1.png)
 
-![Bot2](https://github.com/RodrigoRGRB/BotTesteVocacional/blob/master/bot2.PNG?raw=true)
+![Bot2](https://raw.githubusercontent.com/RodrigoRGRB/BotTesteVocacional/master/bot2.png)

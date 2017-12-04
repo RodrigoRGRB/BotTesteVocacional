@@ -8,4 +8,6 @@ public interface Observer {
 
 	public void update(Long chatId, ArrayList lista);
 	
+	public void updateLocais(long chatId, Double latitude, Double longitude, String title, String endereco);
+	
 }

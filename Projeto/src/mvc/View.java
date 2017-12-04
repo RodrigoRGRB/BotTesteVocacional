@@ -10,19 +10,17 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.TelegramBotAdapter;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.ChatAction;
-import com.pengrad.telegrambot.request.GetUpdates;
-import com.pengrad.telegrambot.request.SendChatAction;
-import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.BaseResponse;
 import com.pengrad.telegrambot.response.GetUpdatesResponse;
 import com.pengrad.telegrambot.response.SendResponse;
+import com.pengrad.telegrambot.request.*;
 
 import jdk.nashorn.internal.ir.ReturnNode;
 
 public class View implements Observer{
 
 	
-	TelegramBot bot = TelegramBotAdapter.build("376301833:AAGcwZBPyiPWSClsxFd4Zh9JQQnGxvLtMqM");
+	TelegramBot bot = TelegramBotAdapter.build("467446941:AAEfPR55e5s7iWn5MX0e8YWOAXSGrXAs0gE");
 
 	//Object that receives messages
 	GetUpdatesResponse updatesResponse;
@@ -40,9 +38,14 @@ public class View implements Observer{
 	
 	ControllerSearch controllerSearch; //Strategy Pattern -- connection View -> Controller
 	ControllerAnswer controllerAnswer;
+	ControllerLocation controllerLocation;
+	
 	boolean searchBehaviour = false;
+	boolean searchLocation = false;
 	
 	private Model model;
+
+	
 
 	public View(Model model){
 		this.model = model; 
@@ -57,10 +60,10 @@ public class View implements Observer{
 		this.controllerAnswer = controllerAnswer;
 	}
 	
-	
-	
-	
-	
+	public void setControllerLocation(ControllerLocation controllerLocation){ //Strategy Pattern
+		this.controllerLocation = controllerLocation;
+	}
+
 	
 	public void receiveUsersMessages() throws FileNotFoundException {
 		
@@ -95,6 +98,7 @@ public class View implements Observer{
 					flag=true;
 				}
 				
+				
 				if(this.searchBehaviour==true){
 					System.out.println(respostas);
 					nome = update.message().text();
@@ -102,6 +106,11 @@ public class View implements Observer{
 					cont=0;
 					setControllerSearch(new ControllerRespostas(model, this));
 					this.callController(update,respostas);
+					
+					
+					setControllerLocation(new ControllerLocal(model, this));
+					
+					
 					
 				}
 				else if(update.message().text().equals("s") || update.message().text().equals("n") || update.message().text().equals("S") || update.message().text().equals("N")){
@@ -116,13 +125,13 @@ public class View implements Observer{
 						//enviar para o controller
 						sendResponse = bot.execute(new SendMessage(update.message().chat().id(),"Ok, uma ultima questão entre com seu nome: "));
 						this.searchBehaviour=true;
-						
+						this.searchLocation=true;
 					}else{
-						sendResponse = bot.execute(new SendMessage(update.message().chat().id(),"digite s ou n, você é/possui "+lista.get(cont)));
+						sendResponse = bot.execute(new SendMessage(update.message().chat().id(),"digite s ou n, você é "+lista.get(cont)));
 						
 					}
 				}else{
-					sendResponse = bot.execute(new SendMessage(update.message().chat().id(),"digite s ou n, você é/possui "+lista.get(cont)));
+					sendResponse = bot.execute(new SendMessage(update.message().chat().id(),"digite s ou n, você é "+lista.get(cont)));
 				}
 				
 			}
@@ -136,6 +145,7 @@ public class View implements Observer{
 	
 	public void callController(Update update, Object respostas){
 		System.out.println("chamou o controller");
+		
 		this.controllerSearch.search(update,respostas);
 	}
 	
@@ -143,21 +153,30 @@ public class View implements Observer{
 		this.controllerAnswer.searchPerguntas(update);
 	}
 	
-	
+	public void callLocation(Update update,Object respostas){
+		System.out.println("chamou o controller dos locais");
+		this.controllerLocation.search(update,respostas);
+		this.searchBehaviour = false;
+	}
 	
 	public void update(long chatId, String profissoes){
 		sendResponse = bot.execute(new SendMessage(chatId, nome+" você pode ser "+profissoes));
-		this.searchBehaviour = false;
+
 	}
 	
 	public void update(Long chatId, ArrayList lista){
 		this.lista = lista;
 	}
-
+	
+	public void updateLocais(long chatId, Double latitude, Double longitude, String title, String endereco){
+		
+		sendResponse = bot.execute(new SendMessage(chatId,"Olha que interessante temos alguns locais que voce pode ir! Local "+title+" Endereço "+endereco));
+	}
 
 	public void sendTypingMessage(Update update){
 		baseResponse = bot.execute(new SendChatAction(update.message().chat().id(), ChatAction.typing.name()));
 	}
+
 	
 	
 	
